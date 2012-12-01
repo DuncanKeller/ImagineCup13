@@ -27,12 +27,21 @@ var Vector2 = (function () {
         this.x = x;
         this.y = y;
     }
+    Vector2.prototype.normalize = function () {
+        var magnitude = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        this.x = this.x / magnitude;
+        this.y = this.y / magnitude;
+    };
+    Vector2.distance = function distance(dest, start) {
+        return Math.sqrt(Math.pow(dest.y - start.y, 2) + Math.pow(dest.x - start.x, 2));
+    }
     return Vector2;
 })();
 var Entity = (function () {
     function Entity(pos) {
         this.position = pos;
         this.velocity = new Vector2(0, 0);
+        this.maxVelocity = 3;
     }
     Entity.prototype.update = function (dt) {
         this.position.x += this.velocity.x;
@@ -46,13 +55,27 @@ var Player = (function (_super) {
     __extends(Player, _super);
     function Player(pos) {
         _super.call(this, pos);
-        this.acceleration = 0.5;
+        this.maxDist = 500;
+        this.maxAccel = 0.3;
+        this.acceleration = 0;
         this.direction = new Vector2(1, 0);
     }
     Player.prototype.update = function (dt) {
         _super.prototype.update.call(this, dt);
         this.velocity.x += this.direction.x * this.acceleration * dt;
         this.velocity.y += this.direction.y * this.acceleration * dt;
+        if(this.velocity.x > this.maxVelocity) {
+            this.velocity.x = this.maxVelocity;
+        }
+        if(this.velocity.x < -this.maxVelocity) {
+            this.velocity.x = -this.maxVelocity;
+        }
+        if(this.velocity.y < -this.maxVelocity) {
+            this.velocity.y = -this.maxVelocity;
+        }
+        if(this.velocity.y > this.maxVelocity) {
+            this.velocity.y = this.maxVelocity;
+        }
     };
     Player.prototype.draw = function () {
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -68,15 +91,20 @@ var updater;
 var shipX;
 var shipY;
 var container;
+var mouseLoc;
+var dest;
+var mouseDown;
+var objects;
 var world;
 var World = (function () {
     function World() {
-        this.objects = new Array();
-        this.objects.push(new Player(new Vector2(100, 100)));
+        objects = new Array();
+        objects.push(new Player(new Vector2(100, 100)));
     }
     World.prototype.update = function () {
-        for(var i = 0; i < this.objects.length; i++) {
-            var e = this.objects[i];
+        mouseUpdate();
+        for(var i = 0; i < objects.length; i++) {
+            var e = objects[i];
             e.update(1);
             e.draw();
         }
@@ -93,7 +121,35 @@ function init() {
     context = canvas.getContext("2d");
     shipX = 40;
     shipY = 40;
+    addEventListener("mousedown", onDown);
+    addEventListener("mousemove", onMove);
+    addEventListener("mouseup", onUp);
     loadImg();
+}
+function onDown(mouseEvent) {
+    mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+    mouseDown = true;
+}
+function onMove(mouseEvent) {
+    mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+}
+function onUp(mouseEvent) {
+    mouseDown = false;
+    var p = objects[0];
+    p.acceleration = 0;
+}
+function mouseUpdate() {
+    if(mouseDown) {
+        dest = mouseLoc;
+        var p = objects[0];
+        var travelVector = new Vector2(dest.x - p.position.x, dest.y - p.position.y);
+        p.direction = travelVector;
+        p.direction.normalize();
+        var dist = Vector2.distance(dest, p.position);
+        if(dist < p.maxDist) {
+            p.acceleration = p.maxAccel * (dist / p.maxDist);
+        }
+    }
 }
 function loadImg() {
     shipImg.push(preload("img/shipNoThrust.png"));
@@ -106,7 +162,6 @@ function preload(uri) {
     return img;
 }
 function draw() {
-    context.drawImage(shipImg[0], shipX, shipY);
 }
 window.onload = function () {
     init();

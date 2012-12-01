@@ -30,15 +30,28 @@ class Vector2 {
         this.y = y;
     }
 
+    normalize() {
+        var magnitude = Math.sqrt(
+            Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        this.x = this.x / magnitude;
+        this.y = this.y / magnitude;
+    }
+
+    static distance(dest: Vector2, start: Vector2) {
+        return Math.sqrt(Math.pow(dest.y - start.y, 2) + Math.pow(dest.x - start.x, 2));
+    }
+
 }
 
 class Entity {
     position: Vector2;
     velocity: Vector2;
+    maxVelocity: number;
 
     constructor (pos: Vector2) {
         this.position = pos;
         this.velocity = new Vector2(0, 0);
+        this.maxVelocity = 3;
     }
 
     update(dt: number) {
@@ -55,17 +68,37 @@ class Entity {
 class Player extends Entity {
     acceleration: number;
     direction: Vector2;
+    maxDist: number;
+    maxAccel: number;
 
     constructor (pos: Vector2) {
         super(pos);
-        this.acceleration = 0.5;
+        this.maxDist = 500;
+        this.maxAccel = 0.3;
+        
+        this.acceleration = 0;
         this.direction = new Vector2(1, 0);
+        
     }
 
     update(dt: number) {
         super.update(dt);
+      
         this.velocity.x += this.direction.x * this.acceleration * dt;
         this.velocity.y += this.direction.y * this.acceleration * dt;
+        
+        if (this.velocity.x > this.maxVelocity) {
+            this.velocity.x = this.maxVelocity;
+        }
+        if (this.velocity.x < -this.maxVelocity) {
+            this.velocity.x = -this.maxVelocity;
+        }
+        if (this.velocity.y < -this.maxVelocity) {
+            this.velocity.y = -this.maxVelocity;
+        }
+        if (this.velocity.y > this.maxVelocity) {
+            this.velocity.y = this.maxVelocity;
+        }
     }
 
     draw() {
@@ -85,21 +118,25 @@ var updater;
 var shipX;
 var shipY;
 var container;
+var mouseLoc;
+var dest;
+var mouseDown;
+var objects;
 
 var world: World;
 
 class World {
-    objects = new Array();
-
     constructor () {
-        this.objects.push(new Player(new Vector2(100, 100)));
+        objects = new Array();
+        objects.push(new Player(new Vector2(100, 100)));
     }
 
     update() {
-        
-        for (var i: number = 0; i < this.objects.length; i++) {
+        mouseUpdate();
+                
+        for (var i: number = 0; i < objects.length; i++) {
 
-            var e : Entity = <Entity>this.objects[i];
+            var e : Entity = <Entity>objects[i];
             e.update(1);
             e.draw();
 
@@ -107,9 +144,7 @@ class World {
     }
 }
 
-function testLoop() {
-    //context.clearRect(0, 0, canvas.width, canvas.height);       
-    //draw();    
+function testLoop() {    
 }
 
 function init() {
@@ -124,7 +159,47 @@ function init() {
     shipX = 40;
     shipY = 40;
 
+    addEventListener("mousedown", onDown);
+    addEventListener("mousemove", onMove);
+    addEventListener("mouseup", onUp);
+
     loadImg();       
+}
+
+function onDown(mouseEvent) {
+	mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+    mouseDown = true;	
+}
+
+function onMove(mouseEvent) {
+	mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);	
+}
+function onUp(mouseEvent) {
+    mouseDown = false;
+    var p: Player = <Player>objects[0];
+    p.acceleration = 0;
+}
+
+function mouseUpdate() {
+    if (mouseDown) {
+        dest = mouseLoc;
+
+        //alert("derp");
+
+        var p: Player = <Player>objects[0];
+        var travelVector = new Vector2(dest.x - p.position.x, dest.y - p.position.y);
+
+        p.direction = travelVector;
+        p.direction.normalize();
+        //context.rotate(Math.atan2(p.direction.y,p.direction.x));
+
+        var dist = Vector2.distance(dest, p.position);
+        if (dist < p.maxDist) {
+            
+           p.acceleration = p.maxAccel * (dist / p.maxDist);
+        }
+    }
+            
 }
 
 function loadImg() {
@@ -142,7 +217,7 @@ function preload(uri){
 }
 
 function draw() {    
-    context.drawImage(shipImg[0], shipX, shipY);	
+    
 }
 
 window.onload = () => {        
