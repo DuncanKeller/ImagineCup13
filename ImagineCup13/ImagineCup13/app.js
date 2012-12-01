@@ -3,6 +3,19 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+var pause;
+var shipImg;
+var canvas;
+var context;
+var updater;
+var shipX;
+var shipY;
+var container;
+var mouseLoc;
+var dest;
+var mouseDown;
+var objects;
+var world;
 var Greeter = (function () {
     function Greeter(element) {
         this.element = element;
@@ -58,12 +71,14 @@ var Player = (function (_super) {
         this.maxDist = 500;
         this.maxAccel = 0.3;
         this.acceleration = 0;
-        this.direction = new Vector2(1, 0);
+        this.direction = new Vector2(0, 0);
+        this.angle = Math.atan2(this.direction.y, this.direction.x);
     }
     Player.prototype.update = function (dt) {
         _super.prototype.update.call(this, dt);
         this.velocity.x += this.direction.x * this.acceleration * dt;
         this.velocity.y += this.direction.y * this.acceleration * dt;
+        this.angle = Math.atan2(this.direction.y, this.direction.x);
         if(this.velocity.x > this.maxVelocity) {
             this.velocity.x = this.maxVelocity;
         }
@@ -79,23 +94,14 @@ var Player = (function (_super) {
     };
     Player.prototype.draw = function () {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(shipImg[0], this.position.x, this.position.y);
+        context.save();
+        context.translate(this.position.x, this.position.y);
+        context.rotate(this.angle);
+        context.drawImage(shipImg[0], -shipImg[0].width * 0.5, -shipImg[0].height * 0.5);
+        context.restore();
     };
     return Player;
 })(Entity);
-var pause;
-var shipImg;
-var canvas;
-var context;
-var updater;
-var shipX;
-var shipY;
-var container;
-var mouseLoc;
-var dest;
-var mouseDown;
-var objects;
-var world;
 var World = (function () {
     function World() {
         objects = new Array();
@@ -132,6 +138,7 @@ function onDown(mouseEvent) {
 }
 function onMove(mouseEvent) {
     mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+    viewportMove();
 }
 function onUp(mouseEvent) {
     mouseDown = false;
@@ -162,6 +169,8 @@ function preload(uri) {
     return img;
 }
 function draw() {
+}
+function viewportMove() {
 }
 window.onload = function () {
     init();

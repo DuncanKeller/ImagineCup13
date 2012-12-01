@@ -1,3 +1,18 @@
+var pause;
+var shipImg;
+var canvas;
+var context;
+var updater;
+var shipX;
+var shipY;
+var container;
+var mouseLoc;
+var dest;
+var mouseDown;
+var objects;
+
+var world: World;
+
 class Greeter {
     element: HTMLElement;
     span: HTMLElement;
@@ -68,6 +83,7 @@ class Entity {
 class Player extends Entity {
     acceleration: number;
     direction: Vector2;
+    angle: number;
     maxDist: number;
     maxAccel: number;
 
@@ -77,8 +93,8 @@ class Player extends Entity {
         this.maxAccel = 0.3;
         
         this.acceleration = 0;
-        this.direction = new Vector2(1, 0);
-        
+        this.direction = new Vector2(0, 0);
+        this.angle = Math.atan2(this.direction.y, this.direction.x);
     }
 
     update(dt: number) {
@@ -86,6 +102,8 @@ class Player extends Entity {
       
         this.velocity.x += this.direction.x * this.acceleration * dt;
         this.velocity.y += this.direction.y * this.acceleration * dt;
+
+        this.angle = Math.atan2(this.direction.y, this.direction.x);
         
         if (this.velocity.x > this.maxVelocity) {
             this.velocity.x = this.maxVelocity;
@@ -103,27 +121,20 @@ class Player extends Entity {
 
     draw() {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(shipImg[0], this.position.x, this.position.y);	
+
+        context.save();
+        // Translate to the center point of our image
+        context.translate(this.position.x, this.position.y);
+        // Perform the rotation
+        context.rotate(this.angle);        
+        // Finally we draw the image
+        context.drawImage(shipImg[0], -shipImg[0].width*.5, -shipImg[0].height*.5);
+        // And restore the context ready for the next loop
+        context.restore();
+        //context.drawImage(shipImg[0], this.position.x, this.position.y);	
     }
 
 }
-
-
-
-var pause;
-var shipImg;
-var canvas;
-var context;
-var updater;
-var shipX;
-var shipY;
-var container;
-var mouseLoc;
-var dest;
-var mouseDown;
-var objects;
-
-var world: World;
 
 class World {
     constructor () {
@@ -139,7 +150,6 @@ class World {
             var e : Entity = <Entity>objects[i];
             e.update(1);
             e.draw();
-
         }
     }
 }
@@ -173,6 +183,7 @@ function onDown(mouseEvent) {
 
 function onMove(mouseEvent) {
 	mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);	
+	viewportMove();
 }
 function onUp(mouseEvent) {
     mouseDown = false;
@@ -191,7 +202,6 @@ function mouseUpdate() {
 
         p.direction = travelVector;
         p.direction.normalize();
-        //context.rotate(Math.atan2(p.direction.y,p.direction.x));
 
         var dist = Vector2.distance(dest, p.position);
         if (dist < p.maxDist) {
@@ -218,6 +228,10 @@ function preload(uri){
 
 function draw() {    
     
+}
+
+function viewportMove() {
+
 }
 
 window.onload = () => {        
