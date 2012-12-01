@@ -10,6 +10,7 @@ var mouseLoc;
 var dest;
 var mouseDown;
 var objects;
+var asteroidImg;
 
 var world: World;
 
@@ -80,6 +81,22 @@ class Entity {
 
 }
 
+class Asteroid extends Entity {
+    constructor (pos: Vector2) {
+        this.velocity = new Vector2((Math.random() * 6) - 3, (Math.random() * 6) - 3);
+        super(new Vector2(Math.random() * 700, Math.random() * 700));
+    }
+
+    update(dt: number) {
+        super.update(dt)
+    }
+
+    draw() {
+        //context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(asteroidImg, this.position.x, this.position.y);	
+    }
+}
+
 class Player extends Entity {
     acceleration: number;
     direction: Vector2;
@@ -140,6 +157,7 @@ class World {
     constructor () {
         objects = new Array();
         objects.push(new Player(new Vector2(100, 100)));
+        objects.push(new Asteroid(new Vector2(100, 100)));
     }
 
     update() {
@@ -217,7 +235,9 @@ function loadImg() {
     
     shipImg.push(preload("img/shipThrust1.png"));
     
-    shipImg.push(preload("img/shipThrust2.png"));    
+    shipImg.push(preload("img/shipThrust2.png")); 
+    
+    asteroidImg = preload("img/asteroid.png");   
 }
 
 function preload(uri){

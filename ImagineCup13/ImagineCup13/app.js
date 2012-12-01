@@ -15,6 +15,7 @@ var mouseLoc;
 var dest;
 var mouseDown;
 var objects;
+var asteroidImg;
 var world;
 var Greeter = (function () {
     function Greeter(element) {
@@ -64,6 +65,20 @@ var Entity = (function () {
     };
     return Entity;
 })();
+var Asteroid = (function (_super) {
+    __extends(Asteroid, _super);
+    function Asteroid(pos) {
+        this.velocity = new Vector2((Math.random() * 6) - 3, (Math.random() * 6) - 3);
+        _super.call(this, new Vector2(Math.random() * 700, Math.random() * 700));
+    }
+    Asteroid.prototype.update = function (dt) {
+        _super.prototype.update.call(this, dt);
+    };
+    Asteroid.prototype.draw = function () {
+        context.drawImage(asteroidImg, this.position.x, this.position.y);
+    };
+    return Asteroid;
+})(Entity);
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(pos) {
@@ -106,6 +121,7 @@ var World = (function () {
     function World() {
         objects = new Array();
         objects.push(new Player(new Vector2(100, 100)));
+        objects.push(new Asteroid(new Vector2(100, 100)));
     }
     World.prototype.update = function () {
         mouseUpdate();
@@ -162,6 +178,7 @@ function loadImg() {
     shipImg.push(preload("img/shipNoThrust.png"));
     shipImg.push(preload("img/shipThrust1.png"));
     shipImg.push(preload("img/shipThrust2.png"));
+    asteroidImg = preload("img/asteroid.png");
 }
 function preload(uri) {
     var img = new Image();
