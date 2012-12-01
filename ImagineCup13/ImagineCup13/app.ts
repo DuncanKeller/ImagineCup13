@@ -11,31 +11,12 @@ var dest;
 var mouseDown;
 var objects;
 var asteroidImg;
+var targetImg;
+var play;
+var mouseX;
+var mouseY;
 
 var world: World;
-
-class Greeter {
-    element: HTMLElement;
-    span: HTMLElement;
-    timerToken: number;
-    
-    constructor (element: HTMLElement) { 
-        this.element = element;
-        this.element.innerText += "The time is: ";
-        this.span = document.createElement('span');
-        this.element.appendChild(this.span);
-        this.span.innerText = new Date().toUTCString();
-    }
-
-    start() {
-        this.timerToken = setInterval(() => this.span.innerText = new Date().toUTCString(), 500);
-    }
-
-    stop() {
-        clearTimeout(this.timerToken);
-    }
-
-}
 
 class Vector2 {
     x: number;
@@ -81,6 +62,22 @@ class Entity {
 
 }
 
+class Target{
+    position: Vector2;
+    
+    constructor (pos: Vector2) {        
+        this.position = pos;
+    } 
+    update(dt: number) {
+        this.position = mouseLoc;
+        //alert(mouseLoc.x);
+    }  
+    draw() {
+        //alert("draw derps");
+        context.drawImage(targetImg, this.position.x, this.position.y);	
+    }
+}
+
 class Asteroid extends Entity {
     constructor (pos: Vector2) {
         this.velocity = new Vector2((Math.random() * 6) - 3, (Math.random() * 6) - 3);
@@ -103,6 +100,8 @@ class Player extends Entity {
     angle: number;
     maxDist: number;
     maxAccel: number;
+    target: Target;
+    pastPos: Vector2;
 
     constructor (pos: Vector2) {
         super(pos);
@@ -116,12 +115,34 @@ class Player extends Entity {
 
     update(dt: number) {
         super.update(dt);
+
+        this.target.update(dt);
       
         this.velocity.x += this.direction.x * this.acceleration * dt;
         this.velocity.y += this.direction.y * this.acceleration * dt;
 
         this.angle = Math.atan2(this.direction.y, this.direction.x);
         
+        if (this.position.x + this.velocity.x*4 >= canvas.width-100) {
+            this.velocity.x = 0;
+            //this.acceleration = 0;
+        }
+
+        if (this.position.x + this.velocity.x*4 <= 100) {
+            this.velocity.x = 0;
+            //this.acceleration = 0;
+        }
+
+        if (this.position.y + this.velocity.y*4 >= canvas.height-100) {
+            this.velocity.y = 0;
+            //this.acceleration = 0;
+        }
+
+        if (this.position.y + this.velocity.y*4 <= 100) {
+            this.velocity.y = 0;
+            //this.acceleration = 0;
+        }
+
         if (this.velocity.x > this.maxVelocity) {
             this.velocity.x = this.maxVelocity;
         }
@@ -138,6 +159,8 @@ class Player extends Entity {
 
     draw() {
         context.clearRect(0, 0, canvas.width, canvas.height);
+
+        this.target.draw();
 
         context.save();
         // Translate to the center point of our image
@@ -156,11 +179,15 @@ class Player extends Entity {
 class World {
     constructor () {
         objects = new Array();
-        objects.push(new Player(new Vector2(100, 100)));
+        play = new Player(new Vector2(100, 100));
+        play.target = new Target(new Vector2(100,100));
+        objects.push(play);
         objects.push(new Asteroid(new Vector2(100, 100)));
+        
     }
 
     update() {
+        //setMousePos(mouseX, mouseY);
         mouseUpdate();
         viewportMove();
                 
@@ -171,9 +198,6 @@ class World {
             e.draw();
         }
     }
-}
-
-function testLoop() {    
 }
 
 function init() {
@@ -188,6 +212,8 @@ function init() {
     shipX = 40;
     shipY = 40;
 
+    setMousePos(100, 100);
+
     addEventListener("mousedown", onDown);
     addEventListener("mousemove", onMove);
     addEventListener("mouseup", onUp);
@@ -196,36 +222,33 @@ function init() {
 }
 
 function onDown(mouseEvent) {
-	mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+	setMousePos(mouseEvent.clientX, mouseEvent.clientY);
     mouseDown = true;	
 }
 
 function onMove(mouseEvent) {
-	mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);	
+    setMousePos(mouseEvent.clientX, mouseEvent.clientY);
 	viewportMove();
 }
+
 function onUp(mouseEvent) {
     mouseDown = false;
-    var p: Player = <Player>objects[0];
-    p.acceleration = 0;
+    play.acceleration = 0;
 }
 
 function mouseUpdate() {
     if (mouseDown) {
         dest = mouseLoc;
 
-        //alert("derp");
+        var travelVector = new Vector2(dest.x - play.position.x, dest.y - play.position.y);
 
-        var p: Player = <Player>objects[0];
-        var travelVector = new Vector2(dest.x - p.position.x, dest.y - p.position.y);
+        play.direction = travelVector;
+        play.direction.normalize();
 
-        p.direction = travelVector;
-        p.direction.normalize();
-
-        var dist = Vector2.distance(dest, p.position);
-        if (dist < p.maxDist) {
+        var dist = Vector2.distance(dest, play.position);
+        if (dist < play.maxDist) {
             
-           p.acceleration = p.maxAccel * (dist / p.maxDist);
+           play.acceleration = play.maxAccel * (dist / play.maxDist);
         }
     }
             
@@ -238,7 +261,9 @@ function loadImg() {
     
     shipImg.push(preload("img/shipThrust2.png")); 
     
-    asteroidImg = preload("img/asteroid.png");   
+    asteroidImg = preload("img/asteroid.png"); 
+    
+    targetImg = preload("img/target.png");  
 }
 
 function preload(uri){
@@ -247,14 +272,19 @@ function preload(uri){
 	return img; //return img
 }
 
-function draw() {    
-    
+function setMousePos(x,y) {    
+    var rect = canvas.getBoundingClientRect();
+    mouseLoc = new Vector2(x - rect.left, y - rect.top);
+    mouseX = mouseLoc.x;
+    mouseY = mouseLoc.y;
 }
 
 function viewportMove() {
-     var p: Player = <Player>objects[0];
     context.setTransform(1,0,0,1,1,1);
-    //context.translate(-(p.position.x-(700/2)), -(p.position.y-(700/2)));
+    context.translate(-(play.position.x-(700/2)), -(play.position.y-(700/2)));
+    //var origin =  context.getBoundingClientRect();
+    //mouseLoc.x += (play.position.x)   
+    //mouseLoc.y += (play.position.y);
 }
 
 window.onload = () => {        

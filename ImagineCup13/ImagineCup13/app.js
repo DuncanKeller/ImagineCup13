@@ -16,26 +16,11 @@ var dest;
 var mouseDown;
 var objects;
 var asteroidImg;
+var targetImg;
+var play;
+var mouseX;
+var mouseY;
 var world;
-var Greeter = (function () {
-    function Greeter(element) {
-        this.element = element;
-        this.element.innerText += "The time is: ";
-        this.span = document.createElement('span');
-        this.element.appendChild(this.span);
-        this.span.innerText = new Date().toUTCString();
-    }
-    Greeter.prototype.start = function () {
-        var _this = this;
-        this.timerToken = setInterval(function () {
-            return _this.span.innerText = new Date().toUTCString();
-        }, 500);
-    };
-    Greeter.prototype.stop = function () {
-        clearTimeout(this.timerToken);
-    };
-    return Greeter;
-})();
 var Vector2 = (function () {
     function Vector2(x, y) {
         this.x = x;
@@ -65,6 +50,18 @@ var Entity = (function () {
     };
     return Entity;
 })();
+var Target = (function () {
+    function Target(pos) {
+        this.position = pos;
+    }
+    Target.prototype.update = function (dt) {
+        this.position = mouseLoc;
+    };
+    Target.prototype.draw = function () {
+        context.drawImage(targetImg, this.position.x, this.position.y);
+    };
+    return Target;
+})();
 var Asteroid = (function (_super) {
     __extends(Asteroid, _super);
     function Asteroid(pos) {
@@ -91,9 +88,22 @@ var Player = (function (_super) {
     }
     Player.prototype.update = function (dt) {
         _super.prototype.update.call(this, dt);
+        this.target.update(dt);
         this.velocity.x += this.direction.x * this.acceleration * dt;
         this.velocity.y += this.direction.y * this.acceleration * dt;
         this.angle = Math.atan2(this.direction.y, this.direction.x);
+        if(this.position.x + this.velocity.x * 4 >= canvas.width - 100) {
+            this.velocity.x = 0;
+        }
+        if(this.position.x + this.velocity.x * 4 <= 100) {
+            this.velocity.x = 0;
+        }
+        if(this.position.y + this.velocity.y * 4 >= canvas.height - 100) {
+            this.velocity.y = 0;
+        }
+        if(this.position.y + this.velocity.y * 4 <= 100) {
+            this.velocity.y = 0;
+        }
         if(this.velocity.x > this.maxVelocity) {
             this.velocity.x = this.maxVelocity;
         }
@@ -109,6 +119,7 @@ var Player = (function (_super) {
     };
     Player.prototype.draw = function () {
         context.clearRect(0, 0, canvas.width, canvas.height);
+        this.target.draw();
         context.save();
         context.translate(this.position.x, this.position.y);
         context.rotate(this.angle);
@@ -120,7 +131,9 @@ var Player = (function (_super) {
 var World = (function () {
     function World() {
         objects = new Array();
-        objects.push(new Player(new Vector2(100, 100)));
+        play = new Player(new Vector2(100, 100));
+        play.target = new Target(new Vector2(100, 100));
+        objects.push(play);
         objects.push(new Asteroid(new Vector2(100, 100)));
     }
     World.prototype.update = function () {
@@ -134,8 +147,6 @@ var World = (function () {
     };
     return World;
 })();
-function testLoop() {
-}
 function init() {
     pause = false;
     shipImg = new Array();
@@ -144,34 +155,33 @@ function init() {
     context = canvas.getContext("2d");
     shipX = 40;
     shipY = 40;
+    setMousePos(100, 100);
     addEventListener("mousedown", onDown);
     addEventListener("mousemove", onMove);
     addEventListener("mouseup", onUp);
     loadImg();
 }
 function onDown(mouseEvent) {
-    mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+    setMousePos(mouseEvent.clientX, mouseEvent.clientY);
     mouseDown = true;
 }
 function onMove(mouseEvent) {
-    mouseLoc = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+    setMousePos(mouseEvent.clientX, mouseEvent.clientY);
     viewportMove();
 }
 function onUp(mouseEvent) {
     mouseDown = false;
-    var p = objects[0];
-    p.acceleration = 0;
+    play.acceleration = 0;
 }
 function mouseUpdate() {
     if(mouseDown) {
         dest = mouseLoc;
-        var p = objects[0];
-        var travelVector = new Vector2(dest.x - p.position.x, dest.y - p.position.y);
-        p.direction = travelVector;
-        p.direction.normalize();
-        var dist = Vector2.distance(dest, p.position);
-        if(dist < p.maxDist) {
-            p.acceleration = p.maxAccel * (dist / p.maxDist);
+        var travelVector = new Vector2(dest.x - play.position.x, dest.y - play.position.y);
+        play.direction = travelVector;
+        play.direction.normalize();
+        var dist = Vector2.distance(dest, play.position);
+        if(dist < play.maxDist) {
+            play.acceleration = play.maxAccel * (dist / play.maxDist);
         }
     }
 }
@@ -180,17 +190,22 @@ function loadImg() {
     shipImg.push(preload("img/shipThrust1.png"));
     shipImg.push(preload("img/shipThrust2.png"));
     asteroidImg = preload("img/asteroid.png");
+    targetImg = preload("img/target.png");
 }
 function preload(uri) {
     var img = new Image();
     img.src = uri;
     return img;
 }
-function draw() {
+function setMousePos(x, y) {
+    var rect = canvas.getBoundingClientRect();
+    mouseLoc = new Vector2(x - rect.left, y - rect.top);
+    mouseX = mouseLoc.x;
+    mouseY = mouseLoc.y;
 }
 function viewportMove() {
-    var p = objects[0];
     context.setTransform(1, 0, 0, 1, 1, 1);
+    context.translate(-(play.position.x - (700 / 2)), -(play.position.y - (700 / 2)));
 }
 window.onload = function () {
     init();
