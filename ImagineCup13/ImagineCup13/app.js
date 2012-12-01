@@ -55,7 +55,7 @@ var Target = (function () {
         this.position = pos;
     }
     Target.prototype.update = function (dt) {
-        this.position = mouseLoc;
+        this.position = new Vector2(mouseLoc.x - 350 + play.position.x, mouseLoc.y - 350 + play.position.y);
     };
     Target.prototype.draw = function () {
         context.drawImage(targetImg, this.position.x, this.position.y);
@@ -65,7 +65,7 @@ var Target = (function () {
 var Asteroid = (function (_super) {
     __extends(Asteroid, _super);
     function Asteroid(pos) {
-        _super.call(this, new Vector2(Math.random() * 700, Math.random() * 700));
+        _super.call(this, new Vector2(Math.random() * canvas.width, Math.random() * canvas.height));
         this.velocity = new Vector2((Math.random() * 3) - 1.5, (Math.random() * 3) - 1.5);
     }
     Asteroid.prototype.update = function (dt) {
@@ -197,7 +197,7 @@ function onUp(mouseEvent) {
 }
 function mouseUpdate() {
     if(mouseDown) {
-        dest = mouseLoc;
+        dest = play.target.position;
         var travelVector = new Vector2(dest.x - play.position.x, dest.y - play.position.y);
         play.direction = travelVector;
         play.direction.normalize();

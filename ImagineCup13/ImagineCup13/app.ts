@@ -69,7 +69,10 @@ class Target{
         this.position = pos;
     } 
     update(dt: number) {
-        this.position = mouseLoc;
+        this.position = new Vector2(
+            mouseLoc.x - 350 + play.position.x,
+            mouseLoc.y - 350 + play.position.y
+        );
         //alert(mouseLoc.x);
     }  
     draw() {
@@ -80,7 +83,7 @@ class Target{
 
 class Asteroid extends Entity {
     constructor (pos: Vector2) {
-        super(new Vector2(Math.random() * 700, Math.random() * 700));
+        super(new Vector2(Math.random() * canvas.width, Math.random() * canvas.height));
         this.velocity = new Vector2((Math.random() * 3) - 1.5, (Math.random() * 3) - 1.5);
  
     }
@@ -267,7 +270,7 @@ function onUp(mouseEvent) {
 
 function mouseUpdate() {
     if (mouseDown) {
-        dest = mouseLoc;
+        dest = play.target.position;
 
         var travelVector = new Vector2(dest.x - play.position.x, dest.y - play.position.y);
 
