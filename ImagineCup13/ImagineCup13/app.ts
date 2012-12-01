@@ -61,7 +61,7 @@ class Entity {
 
 };
 
-class Player extends Entity {
+class Asteroid extends Entity {
 
     constructor (pos: Vector2) {
         super(pos);
@@ -69,6 +69,24 @@ class Player extends Entity {
 
     update(dt: number) {
         super.update(dt);
+    }
+
+};
+
+class Player extends Entity {
+    acceleration: number;
+    direction: Vector2;
+
+    constructor (pos: Vector2) {
+        super(pos);
+        this.acceleration = 100;
+    }
+
+    update(dt: number) {
+        super.update(dt);
+
+        this.velocity.x += this.acceleration * this.direction.x * dt;
+        this.velocity.y += this.acceleration * this.direction.y * dt;
     }
 
 };
