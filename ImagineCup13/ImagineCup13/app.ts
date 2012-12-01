@@ -162,6 +162,7 @@ class World {
 
     update() {
         mouseUpdate();
+        viewportMove();
                 
         for (var i: number = 0; i < objects.length; i++) {
 
@@ -251,7 +252,9 @@ function draw() {
 }
 
 function viewportMove() {
-
+     var p: Player = <Player>objects[0];
+    context.setTransform(1,0,0,1,1,1);
+    //context.translate(-(p.position.x-(700/2)), -(p.position.y-(700/2)));
 }
 
 window.onload = () => {        

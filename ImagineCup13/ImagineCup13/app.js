@@ -125,6 +125,7 @@ var World = (function () {
     }
     World.prototype.update = function () {
         mouseUpdate();
+        viewportMove();
         for(var i = 0; i < objects.length; i++) {
             var e = objects[i];
             e.update(1);
@@ -188,6 +189,8 @@ function preload(uri) {
 function draw() {
 }
 function viewportMove() {
+    var p = objects[0];
+    context.setTransform(1, 0, 0, 1, 1, 1);
 }
 window.onload = function () {
     init();
