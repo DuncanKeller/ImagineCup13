@@ -80,12 +80,39 @@ class Target{
 
 class Asteroid extends Entity {
     constructor (pos: Vector2) {
-        this.velocity = new Vector2((Math.random() * 6) - 3, (Math.random() * 6) - 3);
         super(new Vector2(Math.random() * 700, Math.random() * 700));
+        this.velocity = new Vector2((Math.random() * 3) - 1.5, (Math.random() * 3) - 1.5);
+ 
     }
 
     update(dt: number) {
         super.update(dt)
+
+        for (var i: number = 0; i < objects.length; i++) {
+            if (objects[i] instanceof Asteroid) {
+                if (objects[i] != this) {
+                    var dist = Vector2.distance(objects[i].position, this.position);
+                    if (dist < asteroidImg.width) {
+                        var direction = new Vector2(
+                            objects[i].position.x - this.position.x,
+                            objects[i].position.y - this.position.y);
+                        direction.normalize();
+
+                        var pushOut = asteroidImg.width - dist;
+                        objects[i].position.x += direction.x * (pushOut);
+                        objects[i].position.y += direction.y * (pushOut);
+                        this.position.x -= direction.x * (pushOut);
+                        this.position.y -= direction.y * (pushOut);
+
+                        objects[i].velocity.x *= -direction.x;
+                        objects[i].velocity.y *= -direction.y;
+                        this.velocity.x *= -direction.x;
+                        this.velocity.y *= -direction.y;
+                        
+                    }
+                }
+            }
+        }
     }
 
     draw() {
@@ -182,7 +209,9 @@ class World {
         play = new Player(new Vector2(100, 100));
         play.target = new Target(new Vector2(100,100));
         objects.push(play);
-        objects.push(new Asteroid(new Vector2(100, 100)));
+       for (var i = 0; i < 5; i++) {
+            objects.push(new Asteroid(new Vector2(100, 100)));
+        }
         
     }
 
@@ -274,9 +303,13 @@ function preload(uri){
 
 function setMousePos(x,y) {    
     var rect = canvas.getBoundingClientRect();
+    //mouseLoc = new Vector2(x - rect.left, y - rect.top);
+    
     mouseLoc = new Vector2(x - rect.left, y - rect.top);
-    mouseX = mouseLoc.x;
-    mouseY = mouseLoc.y;
+        
+    
+   // mouseX = mouseLoc.x;
+    //mouseY = mouseLoc.y;
 }
 
 function viewportMove() {
