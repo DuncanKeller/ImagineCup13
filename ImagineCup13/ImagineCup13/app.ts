@@ -21,6 +21,20 @@ class Greeter {
 
 }
 
+class World {
+    objects = new Array();
+
+    constructor () {
+        this.objects.push(new Player(new Vector2(200, 200)));
+    }
+
+    update(dt: number) {
+        for (var i in this.objects) {
+            this.objects[i].update(1);
+        }
+    }
+};
+
 class Vector2 {
     x: number;
     y: number;
@@ -30,7 +44,7 @@ class Vector2 {
         this.y = y;
     }
 
-}
+};
 
 class Entity {
     position: Vector2;
@@ -45,7 +59,7 @@ class Entity {
         this.position.y += this.velocity.y;
     }
 
-}
+};
 
 class Player extends Entity {
 
@@ -57,7 +71,7 @@ class Player extends Entity {
         super.update(dt);
     }
 
-}
+};
 
 window.onload = () => {
     var el = document.getElementById('content');

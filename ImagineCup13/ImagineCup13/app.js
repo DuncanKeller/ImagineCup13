@@ -22,6 +22,18 @@ var Greeter = (function () {
     };
     return Greeter;
 })();
+var World = (function () {
+    function World() {
+        this.objects = new Array();
+        this.objects.push(new Player(new Vector2(200, 200)));
+    }
+    World.prototype.update = function (dt) {
+        for(var i in this.objects) {
+            this.objects[i].update(1);
+        }
+    };
+    return World;
+})();
 var Vector2 = (function () {
     function Vector2(x, y) {
         this.x = x;
@@ -29,6 +41,7 @@ var Vector2 = (function () {
     }
     return Vector2;
 })();
+; ;
 var Entity = (function () {
     function Entity(pos) {
         this.position = pos;
@@ -39,6 +52,7 @@ var Entity = (function () {
     };
     return Entity;
 })();
+; ;
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(pos) {
@@ -49,6 +63,7 @@ var Player = (function (_super) {
     };
     return Player;
 })(Entity);
+; ;
 window.onload = function () {
     var el = document.getElementById('content');
     var greeter = new Greeter(el);
