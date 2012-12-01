@@ -31,6 +31,10 @@
     <TypeScriptCompile Include="app.ts" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="easeljs-0.5.0.min.js" />
+    <Content Include="movieclip-0.5.0.min.js" />
+    <Content Include="soundjs-0.3.0.min.js" />
+    <Content Include="soundjs.flashplugin-0.3.0.min.js" />
     <Content Include="web.config" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>

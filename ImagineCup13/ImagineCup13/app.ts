@@ -21,6 +21,44 @@ class Greeter {
 
 }
 
+class Vector2 {
+    x: number;
+    y: number;
+
+    constructor (x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+}
+
+class Entity {
+    position: Vector2;
+    velocity: Vector2;
+
+    constructor (pos: Vector2) {
+        this.position = pos;
+    }
+
+    update(dt: number) {
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    }
+
+}
+
+class Player extends Entity {
+
+    constructor (pos: Vector2) {
+        super(pos);
+    }
+
+    update(dt: number) {
+        super.update(dt);
+    }
+
+}
+
 window.onload = () => {
     var el = document.getElementById('content');
     var greeter = new Greeter(el);
