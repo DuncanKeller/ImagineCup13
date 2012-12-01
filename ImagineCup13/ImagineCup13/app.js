@@ -32,10 +32,13 @@ var Vector2 = (function () {
 var Entity = (function () {
     function Entity(pos) {
         this.position = pos;
+        this.velocity = new Vector2(0, 0);
     }
     Entity.prototype.update = function (dt) {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
+    };
+    Entity.prototype.draw = function () {
     };
     return Entity;
 })();
@@ -43,9 +46,16 @@ var Player = (function (_super) {
     __extends(Player, _super);
     function Player(pos) {
         _super.call(this, pos);
+        this.acceleration = 0.5;
+        this.direction = new Vector2(1, 0);
     }
     Player.prototype.update = function (dt) {
         _super.prototype.update.call(this, dt);
+        this.velocity.x += this.direction.x * this.acceleration * dt;
+        this.velocity.y += this.direction.y * this.acceleration * dt;
+    };
+    Player.prototype.draw = function () {
+        context.drawImage(shipImg[0], this.position.x, this.position.y);
     };
     return Player;
 })(Entity);
@@ -57,6 +67,22 @@ var updater;
 var shipX;
 var shipY;
 var container;
+var world;
+var World = (function () {
+    function World() {
+        this.objects = new Array();
+        this.objects.push(new Player(new Vector2(100, 100)));
+    }
+    World.prototype.update = function () {
+        for(var i = 0; i < this.objects.length; i++) {
+            var e = this.objects[i];
+            e.update(1);
+            e.draw();
+        }
+        alert(canvas.width);
+    };
+    return World;
+})();
 function testLoop() {
     draw();
 }
@@ -85,6 +111,7 @@ function draw() {
 }
 window.onload = function () {
     init();
-    updater = setInterval("testLoop()", 17);
+    world = new World();
+    updater = setInterval("world.update()", 17);
 };
 //@ sourceMappingURL=app.js.map

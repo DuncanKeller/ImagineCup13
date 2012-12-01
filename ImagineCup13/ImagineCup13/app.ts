@@ -38,6 +38,7 @@ class Entity {
 
     constructor (pos: Vector2) {
         this.position = pos;
+        this.velocity = new Vector2(0, 0);
     }
 
     update(dt: number) {
@@ -45,19 +46,35 @@ class Entity {
         this.position.y += this.velocity.y;
     }
 
+    draw() {
+
+    }
+
 }
 
 class Player extends Entity {
+    acceleration: number;
+    direction: Vector2;
 
     constructor (pos: Vector2) {
         super(pos);
+        this.acceleration = 0.5;
+        this.direction = new Vector2(1, 0);
     }
 
     update(dt: number) {
         super.update(dt);
+        this.velocity.x += this.direction.x * this.acceleration * dt;
+        this.velocity.y += this.direction.y * this.acceleration * dt;
+    }
+
+    draw() {
+        context.drawImage(shipImg[0], this.position.x, this.position.y);	
     }
 
 }
+
+
 
 var pause;
 var shipImg;
@@ -67,6 +84,30 @@ var updater;
 var shipX;
 var shipY;
 var container;
+
+var world: World;
+
+class World {
+    objects = new Array();
+
+    constructor () {
+        this.objects.push(new Player(new Vector2(100, 100)));
+    }
+
+    update() {
+        
+        for (var i: number = 0; i < this.objects.length; i++) {
+
+            var e : Entity = <Entity>this.objects[i];
+            e.update(1);
+            e.draw();
+
+        }
+        alert(canvas.width);
+        //canvas.clearRect(0, 0, 100, 100);
+        //canvas.width = 700;
+    }
+}
 
 function testLoop() {       
     draw();    
@@ -107,6 +148,7 @@ function draw() {
 
 window.onload = () => {        
     init();
+    world = new World();
     
-    updater = setInterval("testLoop()", 17);
+    updater = setInterval("world.update()", 17);
 };
