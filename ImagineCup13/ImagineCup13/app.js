@@ -55,6 +55,7 @@ var Player = (function (_super) {
         this.velocity.y += this.direction.y * this.acceleration * dt;
     };
     Player.prototype.draw = function () {
+        context.clearRect(0, 0, canvas.width, canvas.height);
         context.drawImage(shipImg[0], this.position.x, this.position.y);
     };
     return Player;
@@ -79,12 +80,10 @@ var World = (function () {
             e.update(1);
             e.draw();
         }
-        alert(canvas.width);
     };
     return World;
 })();
 function testLoop() {
-    draw();
 }
 function init() {
     pause = false;

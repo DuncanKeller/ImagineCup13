@@ -69,6 +69,7 @@ class Player extends Entity {
     }
 
     draw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
         context.drawImage(shipImg[0], this.position.x, this.position.y);	
     }
 
@@ -103,14 +104,12 @@ class World {
             e.draw();
 
         }
-        alert(canvas.width);
-        //canvas.clearRect(0, 0, 100, 100);
-        //canvas.width = 700;
     }
 }
 
-function testLoop() {       
-    draw();    
+function testLoop() {
+    //context.clearRect(0, 0, canvas.width, canvas.height);       
+    //draw();    
 }
 
 function init() {
