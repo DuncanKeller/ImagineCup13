@@ -21,20 +21,6 @@ class Greeter {
 
 }
 
-class World {
-    objects = new Array();
-
-    constructor () {
-        this.objects.push(new Player(new Vector2(200, 200)));
-    }
-
-    update(dt: number) {
-        for (var i in this.objects) {
-            this.objects[i].update(1);
-        }
-    }
-};
-
 class Vector2 {
     x: number;
     y: number;
@@ -44,7 +30,7 @@ class Vector2 {
         this.y = y;
     }
 
-};
+}
 
 class Entity {
     position: Vector2;
@@ -59,40 +45,68 @@ class Entity {
         this.position.y += this.velocity.y;
     }
 
-};
-
-class Asteroid extends Entity {
-
-    constructor (pos: Vector2) {
-        super(pos);
-    }
-
-    update(dt: number) {
-        super.update(dt);
-    }
-
-};
+}
 
 class Player extends Entity {
-    acceleration: number;
-    direction: Vector2;
 
     constructor (pos: Vector2) {
         super(pos);
-        this.acceleration = 100;
     }
 
     update(dt: number) {
         super.update(dt);
-
-        this.velocity.x += this.acceleration * this.direction.x * dt;
-        this.velocity.y += this.acceleration * this.direction.y * dt;
     }
 
-};
+}
 
-window.onload = () => {
-    var el = document.getElementById('content');
-    var greeter = new Greeter(el);
-    greeter.start();
+var pause;
+var shipImg;
+var canvas;
+var context;
+var updater;
+var shipX;
+var shipY;
+var container;
+
+function testLoop() {       
+    draw();    
+}
+
+function init() {
+    pause = false;
+    shipImg = new Array();
+
+    container = document.getElementById("content");     
+
+    canvas = document.getElementById("gameCanvas");
+    context = canvas.getContext("2d");     
+
+    shipX = 40;
+    shipY = 40;
+
+    loadImg();       
+}
+
+function loadImg() {
+    shipImg.push(preload("img/shipNoThrust.png"));
+    
+    shipImg.push(preload("img/shipThrust1.png"));
+    
+    shipImg.push(preload("img/shipThrust2.png"));    
+}
+
+function preload(uri){
+	var img = new Image(); //makes a new image
+	img.src = uri; //sets new image to passed source
+	return img; //return img
+}
+
+function draw() {    
+    context.drawImage(shipImg[0], shipX, shipY);	
+}
+
+window.onload = () => {        
+    init();
+    
+    updater = setInterval("testLoop()", 17);
 };
